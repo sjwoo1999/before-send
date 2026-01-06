@@ -1,0 +1,155 @@
+{
+    "task": "Enable Mock/Simulation Mode for Before Send MVP",
+    "description": "Update the Before Send application to run in mock mode without requiring Supabase database or Claude API connections. This allows immediate testing and demonstration of the full user flow.",
+    "objectives": [
+        "Create mock data layer that simulates AI analysis responses",
+        "Bypass Supabase authentication and database operations when in mock mode",
+        "Enable toggling between mock and production modes via environment variable",
+        "Maintain identical UI/UX behavior regardless of mode"
+    ],
+    "implementation": {
+        "environment_variable": {
+            "name": "NEXT_PUBLIC_MOCK_MODE",
+            "values": [
+                "true",
+                "false"
+            ],
+            "default": "false",
+            "description": "When 'true', all API calls return mock data without external dependencies"
+        },
+        "files_to_create": [
+            {
+                "path": "src/lib/mock/mockAnalysis.ts",
+                "purpose": "Mock Claude AI responses with realistic Korean message analysis",
+                "exports": [
+                    "getMockAnalysis(originalMessage: string): ClaudeResponse"
+                ]
+            },
+            {
+                "path": "src/lib/mock/mockHistory.ts",
+                "purpose": "In-memory storage for mock history during session",
+                "exports": [
+                    "mockHistoryStore",
+                    "addMockCheck",
+                    "getMockChecks",
+                    "deleteMockCheck"
+                ]
+            }
+        ],
+        "files_to_modify": [
+            {
+                "path": "src/app/api/check/route.ts",
+                "changes": [
+                    "Check NEXT_PUBLIC_MOCK_MODE at start of POST handler",
+                    "If mock mode: skip Supabase auth, skip Claude API, use getMockAnalysis()",
+                    "Store result in mockHistoryStore instead of database"
+                ]
+            },
+            {
+                "path": "src/app/api/check/[id]/route.ts",
+                "changes": [
+                    "In mock mode: fetch from mockHistoryStore or tempStorage",
+                    "Skip Supabase auth check"
+                ]
+            },
+            {
+                "path": "src/app/api/history/route.ts",
+                "changes": [
+                    "In mock mode: return getMockChecks() instead of Supabase query"
+                ]
+            },
+            {
+                "path": "src/lib/supabase/server.ts",
+                "changes": [
+                    "Add isMockMode() helper function",
+                    "Gracefully handle missing environment variables in mock mode"
+                ]
+            }
+        ]
+    },
+    "mock_data_specification": {
+        "tone_analysis_rules": {
+            "keywords_aggressive": [
+                "왜",
+                "맨날",
+                "항상",
+                "도대체",
+                "진짜"
+            ],
+            "keywords_defensive": [
+                "그게 아니라",
+                "내 잘못이 아니",
+                "너야말로"
+            ],
+            "keywords_passive_aggressive": [
+                "알겠어",
+                "그래 알았어",
+                "뭐 좋을대로"
+            ],
+            "default": "neutral"
+        },
+        "mock_revisions": {
+            "soft": "Transform to warm, empathetic tone",
+            "neutral": "Transform to fact-focused, minimal emotion",
+            "assertive": "Transform to clear boundaries, respectful firm"
+        },
+        "mock_highlights": {
+            "detect_patterns": [
+                {
+                    "pattern": "왜.*해",
+                    "type": "accusatory_question"
+                },
+                {
+                    "pattern": "맨날|항상|늘",
+                    "type": "generalization"
+                },
+                {
+                    "pattern": "한심|바보|멍청",
+                    "type": "insult"
+                }
+            ]
+        }
+    },
+    "testing_scenarios": [
+        {
+            "name": "Aggressive message",
+            "input": "너 왜 맨날 그 모양이야? 진짜 한심하다",
+            "expected_tone": "aggressive",
+            "expected_risk": "high",
+            "expected_highlights": [
+                "맨날",
+                "한심하다"
+            ]
+        },
+        {
+            "name": "Neutral message",
+            "input": "내일 3시에 회의 있는데 참석 가능하신가요?",
+            "expected_tone": "neutral",
+            "expected_risk": "low",
+            "expected_highlights": []
+        },
+        {
+            "name": "Passive aggressive",
+            "input": "알겠어요. 뭐 맨날 그러시니까 저야 뭐 상관없죠",
+            "expected_tone": "passive_aggressive",
+            "expected_risk": "medium",
+            "expected_highlights": [
+                "맨날",
+                "상관없죠"
+            ]
+        }
+    ],
+    "activation": {
+        "development": "Add NEXT_PUBLIC_MOCK_MODE=true to .env.local",
+        "demo": "Deploy with mock mode enabled for demos without API costs",
+        "production": "Ensure NEXT_PUBLIC_MOCK_MODE is false or unset"
+    },
+    "ui_indicators": {
+        "mock_badge": {
+            "show_when": "NEXT_PUBLIC_MOCK_MODE === 'true'",
+            "position": "fixed bottom-right corner",
+            "text": "🧪 Mock Mode",
+            "purpose": "Clearly indicate to testers that mock mode is active"
+        }
+    }
+}

@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 보내기 전에 (Before Send)
 
-## Getting Started
+감정적 메시지를 보내기 전에 톤을 분석하고, 관계를 망치지 않는 3가지 수정안을 제공하는 AI 서비스
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+ 
+- Supabase account
+- Anthropic Claude API key
+
+### Installation
 
 ```bash
+# Clone and install
+git clone <repo-url>
+cd before-send
+npm install
+
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# Run Supabase migration
+# Apply supabase/migrations/001_message_checks.sql to your Supabase project
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/
+│   ├── page.tsx                    # Landing page
+│   ├── check/
+│   │   ├── page.tsx                # Input form
+│   │   └── result/[id]/page.tsx    # Analysis result
+│   ├── history/page.tsx            # Saved checks
+│   └── api/
+│       ├── check/route.ts          # POST: create check
+│       ├── check/[id]/route.ts     # GET/DELETE: check by ID
+│       └── history/route.ts        # GET: user's history
+├── components/
+│   ├── ui/                         # Atomic components
+│   ├── ComparisonView.tsx          # Before/after comparison
+│   └── MoodRxCta.tsx               # Mood Rx integration CTA
+└── lib/
+    ├── claude.ts                   # AI client
+    ├── schema.ts                   # Zod schemas
+    ├── safety.ts                   # Content filtering
+    ├── rateLimit.ts                # 3/day limit
+    └── supabase/                   # DB clients
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔑 Environment Variables
 
-## Learn More
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase service role (server only) |
+| `CLAUDE_API_KEY` | ✅ | Anthropic Claude API key |
+| `RATE_LIMIT_REDIS_URL` | ❌ | Upstash Redis (optional) |
 
-To learn more about Next.js, take a look at the following resources:
+## 📊 Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run the migration in `supabase/migrations/001_message_checks.sql` which creates:
+- `message_checks` table with RLS policies
+- Owner-only access (select, insert, delete)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎨 Design System
 
-## Deploy on Vercel
+- **Primary**: Navy (#0B1220)
+- **Accent**: Teal (#19C2A0)
+- **Fonts**: Pretendard + Inter
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Tone Badges
+- Aggressive (Red), Defensive (Amber), Passive Aggressive (Purple), Neutral (Green)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Revision Cards
+- Soft (Teal), Neutral (Slate), Assertive (Blue)
+
+## 🚢 Deploy to Vercel
+
+1. Push to GitHub
+2. Connect to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+## 📋 Rate Limiting
+
+- Free tier: 3 checks/day
+- Uses Upstash Redis if configured, otherwise in-memory
+
+## ⚠️ Safety
+
+- Keyword pre-check for harmful content
+- AI-level blocking for manipulation/threats
+- Disclaimer on all pages
+
+---
+
+Built with Next.js 14, Tailwind CSS, Supabase, and Claude AI.

@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
+/* ===== Design Tokens: Before Send (보내기 전에) ===== */
+
+/* Font Imports */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
+  /* Brand Colors */
+  --color-primary: #0B1220;
+  --color-primary-sub: #111B2E;
+  --color-accent: #19C2A0;
+  --color-accent-hover: #14a589;
+  
+  /* Background & Foreground */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0B1220;
+  
+  /* Tone Badge Colors */
+  --tone-aggressive-bg: #FEF2F2;
+  --tone-aggressive-text: #B91C1C;
+  --tone-aggressive-ring: #FECACA;
+  
+  --tone-defensive-bg: #FFFBEB;
+  --tone-defensive-text: #B45309;
+  --tone-defensive-ring: #FDE68A;
+  
+  --tone-passive-aggressive-bg: #FAF5FF;
+  --tone-passive-aggressive-text: #7E22CE;
+  --tone-passive-aggressive-ring: #E9D5FF;
+  
+  --tone-neutral-bg: #F0FDF4;
+  --tone-neutral-text: #15803D;
+  --tone-neutral-ring: #BBF7D0;
+  
+  /* Revision Card Colors */
+  --revision-soft-border: #99F6E4;
+  --revision-soft-bg: rgba(240, 253, 250, 0.5);
+  
+  --revision-neutral-border: #E2E8F0;
+  --revision-neutral-bg: rgba(248, 250, 252, 0.5);
+  
+  --revision-assertive-border: #BFDBFE;
+  --revision-assertive-bg: rgba(239, 246, 255, 0.5);
+  
+  /* Highlight Colors */
+  --highlight-bg: #FFE4E6;
+  --highlight-text: #881337;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--color-primary);
+  --color-primary-sub: var(--color-primary-sub);
+  --color-accent: var(--color-accent);
+  --font-sans: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0B1220;
+    --foreground: #F8FAFC;
   }
 }
 
+/* Base Styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Utilities */
+.text-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.text-h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.text-h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.text-body {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #64748B;
+}
+
+/* Focus Ring */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Highlight Token */
+.highlight-token {
+  background-color: var(--highlight-bg);
+  color: var(--highlight-text);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+/* Skeleton Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: #E2E8F0;
+  border-radius: 0.375rem;
+}
+
+/* Toast Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast-enter {
+  animation: slide-up 0.2s ease-out;
 }
